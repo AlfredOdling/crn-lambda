@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './index.css'
-import App from './App'
+import './styles/index.css'
 import { Platform } from 'react-native'
+import App from './App'
 import * as serviceWorker from './serviceWorker'
 
 // Inject CSS for RNVI if on web
@@ -10,6 +10,7 @@ if (Platform.OS === 'web') {
   require('./iconResolver')
 }
 
+// eslint-disable-next-line no-undef
 ReactDOM.render(<App />, document.getElementById('root'))
 
 // If you want your app to work offline and load faster, you can change

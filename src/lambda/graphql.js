@@ -7,11 +7,11 @@ const ENGINE_API_KEY = 'service:AlfredOdling-3783:_5bAC7Q-cWxmC4RV0Cy0kw'
 class RandomUserAPI extends RESTDataSource {
   constructor() {
     super()
-    this.baseURL = "https://api.randomuser.me/"
+    this.baseURL = 'https://api.randomuser.me/'
   }
 
   async getPerson() {
-    const { results } = await this.get("")
+    const { results } = await this.get('')
     return results
   }
 }
@@ -22,17 +22,21 @@ const dataSources = () => ({
 
 // -------------- Schema ---------------
 const typeDefs = gql`
-  """ QUERIES """
+  """
+  QUERIES
+  """
   type Query {
-    hello: String!,
-    persons: [Person!]!,
-  },
+    hello: String!
+    persons: [Person!]!
+  }
 
-  """ TYPES """
+  """
+  TYPES
+  """
   type Person {
-    gender: String,
-    email: String,
-    phone: Int,
+    gender: String
+    email: String
+    phone: Int
   }
 `
 
@@ -49,7 +53,7 @@ const resolvers = {
     hello: () => 'hello',
     persons: (_, __, { dataSources }) => {
       return dataSources.randomUserAPI.getPerson()
-    }
+    },
   },
 }
 

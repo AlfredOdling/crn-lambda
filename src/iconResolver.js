@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // Generates an array of CSS styling for all RNVI icons
 const generateFontStyles = iconNames =>
   iconNames.map(name => {
@@ -24,7 +25,9 @@ const icons = [
 ]
 
 // Create a single style string
-const iconsCss = generateFontStyles(icons).reduce((acc, curr) => `${acc}\n${curr}`)
+const iconsCss = generateFontStyles(icons).reduce(
+  (acc, curr) => `${acc}\n${curr}`
+)
 
 // Create stylesheet
 const style = document.createElement('style')

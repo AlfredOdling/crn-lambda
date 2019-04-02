@@ -17,9 +17,9 @@ export const ADD_FIELD = gql`
 
 // SERVER
 export const getPersons = gql`
-query {
-  persons {
-    email
+  query {
+    persons {
+      email
+    }
   }
-}
 `
