@@ -1,7 +1,7 @@
+import { ENGINE_API_KEY } from '../utils/constants'
 const { ApolloServer, gql } = require('apollo-server-lambda')
 const { RESTDataSource } = require('apollo-datasource-rest')
 const casual = require('casual')
-const ENGINE_API_KEY = 'service:AlfredOdling-3783:_5bAC7Q-cWxmC4RV0Cy0kw'
 
 // -------------- Datasources ---------------
 class RandomUserAPI extends RESTDataSource {
