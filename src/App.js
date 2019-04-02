@@ -1,40 +1,28 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
-import { Button, Icon } from 'react-native-elements'
+import ApolloClient, { InMemoryCache } from 'apollo-boost'
+import ExampleComponent from './ExampleComponent'
+import { ApolloProvider } from 'react-apollo'
+import { APOLLO_CLIENT_URI } from './utils'
 
+const cache = new InMemoryCache()
+const client = new ApolloClient({
+  cache,
+  uri: APOLLO_CLIENT_URI,
+  // connectToDevTools: false, // Enabling devtools in production if true
+})
+
+// Default State
+cache.writeData({
+  data: {
+    someField: 'some value!!',
+  },
+})
 export default class App extends Component {
   render() {
     return (
-      <View style={styles.app}>
-        <View style={styles.appHeader}>
-          <Text style={styles.appTitle}>Welcome to React️</Text>
-          <Button title="Label" />
-          <Icon name="ios-menu" type="ionicon" color="white" />
-        </View>
-        <Text style={styles.appIntro}>Hello World!</Text>
-      </View>
+      <ApolloProvider client={client}>
+        <ExampleComponent />
+      </ApolloProvider>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  app: {
-    flex: 1,
-  },
-  appHeader: {
-    flex: 1,
-    backgroundColor: '#222',
-    padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  appTitle: {
-    fontSize: 16,
-    color: 'white',
-  },
-  appIntro: {
-    flex: 2,
-    fontSize: 30,
-    textAlign: 'center',
-  },
-})
