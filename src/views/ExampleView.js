@@ -6,6 +6,7 @@ import { getSomeField, getPersons } from '../lambda/queries'
 const ExampleView = props => {
   const { getSomeField, getPersons } = props
   const { error, loading, persons } = getPersons
+  console.log('props', props)
 
   return (
     <View style={{ padding: 50 }}>

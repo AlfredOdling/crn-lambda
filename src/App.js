@@ -8,6 +8,9 @@ const cache = new InMemoryCache()
 const client = new ApolloClient({
   cache,
   uri: APOLLO_CLIENT_URI,
+  fetchOptions: {
+    mode: 'no-cors',
+  },
 })
 
 // Default State
@@ -16,6 +19,14 @@ cache.writeData({
     someField: 'some value!!',
   },
 })
+
+// export const graphQLClient = new ApolloClient({
+//   link,
+//   fetchOptions: {
+//     mode: 'no-cors',
+//   },
+//   cache: new InMemoryCache()
+// });
 
 export default class App extends Component {
   render() {
