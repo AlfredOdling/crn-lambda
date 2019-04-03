@@ -22,17 +22,10 @@ const dataSources = () => ({
 
 // -------------- Schema ---------------
 const typeDefs = gql`
-  """
-  QUERIES
-  """
   type Query {
     hello: String!
     persons: [Person!]!
   }
-
-  """
-  TYPES
-  """
   type Person {
     gender: String
     email: String
