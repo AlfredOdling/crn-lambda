@@ -1,8 +1,19 @@
 import React, { Component } from 'react'
-import { gql } from 'babel-plugin-graphql-js-client-transform'
-import { View, Button } from 'react-native'
-import Products from '../components/Products'
-import Cart from './components/Cart'
+// import PropTypes from 'prop-types'
+import { graphql, compose } from 'react-apollo'
+import { Text, View } from 'react-native'
+import { ready, loading } from '../lambda/enums'
+import Product from '../components/Product'
+import Cart from '../components/Cart'
+
+import { getData } from '../lambda/queries'
+import {
+  createCheckout,
+  checkoutLineItemsAdd,
+  checkoutLineItemsUpdate,
+  checkoutLineItemsRemove,
+  checkoutCustomerAssociate,
+} from '../lambda/checkoutQueries'
 
 class ShopifyApp extends Component {
   constructor() {
@@ -10,284 +21,124 @@ class ShopifyApp extends Component {
 
     this.state = {
       isCartOpen: false,
-      checkout: { lineItems: [] },
+      isCustomerAuthOpen: false,
+      isNewCustomer: false,
       products: [],
-      shop: {},
+      checkout: {
+        lineItems: {
+          edges: [],
+          id: undefined,
+        },
+      },
+    }
+  }
+
+  componentDidMount() {
+    this.props
+      .createCheckout({
+        variables: {
+          input: {},
+        },
+      })
+      .then(res => {
+        this.setState({
+          checkout: res.data.checkoutCreate.checkout,
+        })
+      })
+  }
+
+  addVariantToCart = (variantId, quantity) => {
+    // TODO: fixa till detta
+    let _variantId =
+      'Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC8yMjAzMTY5MjI2NzYwNQ=='
+
+    this.props
+      .checkoutLineItemsAdd({
+        variables: {
+          checkoutId: this.state.checkout.id,
+          lineItems: [
+            { variantId: _variantId, quantity: parseInt(quantity, 10) },
+          ],
+        },
+      })
+      .then(res => {
+        this.setState({
+          checkout: res.data.checkoutLineItemsAdd.checkout,
+        })
+      })
+
+    this.handleCartOpen()
+  }
+
+  updateLineItemInCart = (lineItemId, quantity) => {
+    this.props
+      .checkoutLineItemsUpdate({
+        variables: {
+          checkoutId: this.state.checkout.id,
+          lineItems: [{ id: lineItemId, quantity: parseInt(quantity, 10) }],
+        },
+      })
+      .then(res => {
+        this.setState({
+          checkout: res.data.checkoutLineItemsUpdate.checkout,
+        })
+      })
+  }
+
+  removeLineItemInCart = lineItemId => {
+    this.props
+      .checkoutLineItemsRemove({
+        variables: {
+          checkoutId: this.state.checkout.id,
+          lineItemIds: [lineItemId],
+        },
+      })
+      .then(res => {
+        this.setState({
+          checkout: res.data.checkoutLineItemsRemove.checkout,
+        })
+      })
+  }
+
+  associateCustomerCheckout = customerAccessToken => {
+    this.props
+      .checkoutCustomerAssociate({
+        variables: {
+          checkoutId: this.state.checkout.id,
+          customerAccessToken,
+        },
+      })
+      .then(res => {
+        this.setState({
+          checkout: res.data.checkoutCustomerAssociate.checkout,
+          isCustomerAuthOpen: false,
+        })
+      })
+  }
+
+  products = () => {
+    let products = []
+    if (this.props.getData.networkStatus === ready) {
+      products = this.props.getData.shop.products.edges.map(product => (
+        <Product
+          addVariantToCart={this.addVariantToCart}
+          checkout={{ lineItems: { edges: [] } }}
+          key={product.node.id.toString()}
+          product={product.node}
+        />
+      ))
     }
 
-    this.handleCartClose = this.handleCartClose.bind(this)
-    this.addVariantToCart = this.addVariantToCart.bind(this)
-    this.updateQuantityInCart = this.updateQuantityInCart.bind(this)
-    this.removeLineItemInCart = this.removeLineItemInCart.bind(this)
+    return products
   }
 
-  componentWillMount() {
-    const client = this.props.client
-
-    client
-      .send(
-        gql(client)`
-      mutation {
-        checkoutCreate(input: {}) {
-          userErrors {
-            message
-            field
-          }
-          checkout {
-            id
-            webUrl
-            subtotalPrice
-            totalTax
-            totalPrice
-            lineItems (first:250) {
-              pageInfo {
-                hasNextPage
-                hasPreviousPage
-              }
-              edges {
-                node {
-                  title
-                  variant {
-                    title
-                    image {
-                      src
-                    }
-                    price
-                  }
-                  quantity
-                }
-              }
-            }
-          }
-        }
-      }
-    `
-      )
-      .then(res => {
-        this.setState({
-          checkout: res.model.checkoutCreate.checkout,
-        })
-      })
-
-    client
-      .send(
-        gql(client)`
-      query {
-        shop {
-          name
-          description
-          products(first:20) {
-            pageInfo {
-              hasNextPage
-              hasPreviousPage
-            }
-            edges {
-              node {
-                id
-                title
-                options {
-                  name
-                  values
-                }
-                variants(first: 250) {
-                  pageInfo {
-                    hasNextPage
-                    hasPreviousPage
-                  }
-                  edges {
-                    node {
-                      title
-                      selectedOptions {
-                        name
-                        value
-                      }
-                      image {
-                        src
-                      }
-                      price
-                    }
-                  }
-                }
-                images(first: 250) {
-                  pageInfo {
-                    hasNextPage
-                    hasPreviousPage
-                  }
-                  edges {
-                    node {
-                      src
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `
-      )
-      .then(res => {
-        this.setState({
-          shop: res.model.shop,
-          products: res.model.shop.products,
-        })
-      })
-  }
-
-  addVariantToCart(variantId, quantity) {
+  handleCartOpen = () => {
     this.setState({
       isCartOpen: true,
     })
-
-    const lineItems = [{ variantId, quantity: parseInt(quantity, 10) }]
-    const checkoutId = this.state.checkout.id
-
-    return this.props.client
-      .send(
-        gql(this.props.client)`
-      mutation ($checkoutId: ID!, $lineItems: [CheckoutLineItemInput!]!) {
-        checkoutLineItemsAdd(checkoutId: $checkoutId, lineItems: $lineItems) {
-          userErrors {
-            message
-            field
-          }
-          checkout {
-            webUrl
-            subtotalPrice
-            totalTax
-            totalPrice
-            lineItems (first:250) {
-              pageInfo {
-                hasNextPage
-                hasPreviousPage
-              }
-              edges {
-                node {
-                  title
-                  variant {
-                    title
-                    image {
-                      src
-                    }
-                    price
-                  }
-                  quantity
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-        { checkoutId, lineItems }
-      )
-      .then(res => {
-        this.setState({
-          checkout: res.model.checkoutLineItemsAdd.checkout,
-        })
-      })
   }
 
-  updateQuantityInCart(lineItemId, quantity) {
-    const checkoutId = this.state.checkout.id
-    const lineItems = [{ id: lineItemId, quantity: parseInt(quantity, 10) }]
-
-    return this.props.client
-      .send(
-        gql(this.props.client)`
-      mutation ($checkoutId: ID!, $lineItems: [CheckoutLineItemUpdateInput!]!) {
-        checkoutLineItemsUpdate(checkoutId: $checkoutId, lineItems: $lineItems) {
-          userErrors {
-            message
-            field
-          }
-          checkout {
-            webUrl
-            subtotalPrice
-            totalTax
-            totalPrice
-            lineItems (first:250) {
-              pageInfo {
-                hasNextPage
-                hasPreviousPage
-              }
-              edges {
-                node {
-                  title
-                  variant {
-                    title
-                    image {
-                      src
-                    }
-                    price
-                  }
-                  quantity
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-        { checkoutId, lineItems }
-      )
-      .then(res => {
-        this.setState({
-          checkout: res.model.checkoutLineItemsUpdate.checkout,
-        })
-      })
-  }
-
-  removeLineItemInCart(lineItemId) {
-    const checkoutId = this.state.checkout.id
-
-    return this.props.client
-      .send(
-        gql(this.props.client)`
-      mutation ($checkoutId: ID!, $lineItemIds: [ID!]!) {
-        checkoutLineItemsRemove(checkoutId: $checkoutId, lineItemIds: $lineItemIds) {
-          userErrors {
-            message
-            field
-          }
-          checkout {
-            webUrl
-            subtotalPrice
-            totalTax
-            totalPrice
-            lineItems (first:250) {
-              pageInfo {
-                hasNextPage
-                hasPreviousPage
-              }
-              edges {
-                node {
-                  title
-                  variant {
-                    title
-                    image {
-                      src
-                    }
-                    price
-                  }
-                  quantity
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-        { checkoutId, lineItemIds: [lineItemId] }
-      )
-      .then(res => {
-        this.setState({
-          checkout: res.model.checkoutLineItemsRemove.checkout,
-        })
-      })
-  }
-
-  handleCartClose() {
+  handleCartClose = () => {
     this.setState({
       isCartOpen: false,
     })
@@ -296,33 +147,53 @@ class ShopifyApp extends Component {
   render() {
     return (
       <View>
-        <View>
-          {!this.state.isCartOpen && (
-            <View>
-              <Button onPress={() => this.setState({ isCartOpen: true })}>
-                Cart
-              </Button>
-            </View>
-          )}
-          <View>
-            <h1>{this.state.shop.name}: React Example</h1>
-            <h2>{this.state.shop.description}</h2>
-          </View>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            backgroundColor: 'grey',
+            padding: 50,
+            marginBottom: 50,
+          }}>
+          <Text>SWEDEN</Text>
+          <Text>WEBSHOP</Text>
+          <Text>SEARCH</Text>
+          <Text>CART</Text>
         </View>
-        <Products
-          products={this.state.products}
-          addVariantToCart={this.addVariantToCart}
-        />
-        <Cart
-          checkout={this.state.checkout}
-          isCartOpen={this.state.isCartOpen}
-          handleCartClose={this.handleCartClose}
-          updateQuantityInCart={this.updateQuantityInCart}
-          removeLineItemInCart={this.removeLineItemInCart}
-        />
+        <View>{this.products()}</View>
+
+        {this.state.isCartOpen ? (
+          <Cart
+            removeLineItemInCart={this.removeLineItemInCart}
+            updateLineItemInCart={this.updateLineItemInCart}
+            checkout={this.state.checkout}
+            isCartOpen={this.state.isCartOpen}
+            handleCartClose={this.handleCartClose}
+            customerAccessToken={this.state.customerAccessToken}
+          />
+        ) : null}
       </View>
     )
   }
 }
 
-export default ShopifyApp
+export default compose(
+  graphql(createCheckout, { name: 'createCheckout' }),
+  graphql(checkoutLineItemsAdd, { name: 'checkoutLineItemsAdd' }),
+  graphql(checkoutLineItemsUpdate, { name: 'checkoutLineItemsUpdate' }),
+  graphql(checkoutLineItemsRemove, { name: 'checkoutLineItemsRemove' }),
+  graphql(checkoutCustomerAssociate, { name: 'checkoutCustomerAssociate' }),
+  graphql(getData, { name: 'getData' })
+)(ShopifyApp)
+
+// ShopifyApp.propTypes = {
+//   data: PropTypes.shape({
+//     loading: PropTypes.bool,
+//     error: PropTypes.object,
+//     shop: PropTypes.object,
+//   }).isRequired,
+//   createCheckout: PropTypes.func.isRequired,
+//   checkoutLineItemsAdd: PropTypes.func.isRequired,
+//   checkoutLineItemsUpdate: PropTypes.func.isRequired,
+// }
