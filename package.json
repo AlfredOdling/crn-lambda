@@ -45,6 +45,7 @@
     "react-native-elements": "^1.1.0",
     "react-native-vector-icons": "^6.4.2",
     "react-native-web": "^0.11.1",
+    "react-netlify-identity": "^0.0.7",
     "react-router-dom": "^5.0.0",
     "react-router-native": "^5.0.0",
     "react-scripts": "2.1.8"

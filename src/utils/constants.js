@@ -1,4 +1,4 @@
-const ngrok = 'https://2b9990b4.ngrok.io'
+const ngrok = 'https://a8d5357f.ngrok.io'
 const netlify = 'https://nifty-dijkstra-5d4938.netlify.com'
 
 export const NETLIFY_URL = netlify + '/.netlify/functions/graphql'

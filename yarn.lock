@@ -8848,7 +8848,7 @@ lodash.flow@^3.5.0:
   resolved "https://registry.yarnpkg.com/lodash.flow/-/lodash.flow-3.5.0.tgz#87bf40292b8cf83e4e8ce1a3ae4209e20071675a"
   integrity sha1-h79AKSuM+D5OjOGjrkIJ4gBxZ1o=
 
-lodash.get@^4:
+lodash.get@^4, lodash.get@^4.4.2:
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
   integrity sha1-LRd/ZS+jHpObRDjVNBSZ36OCXpk=
@@ -11697,6 +11697,16 @@ react-native-branch@2.2.5:
   resolved "https://registry.yarnpkg.com/react-native-branch/-/react-native-branch-2.2.5.tgz#4074dd63b4973e6397d9ce50e97b57c77a518e9d"
   integrity sha1-QHTdY7SXPmOX2c5Q6XtXx3pRjp0=
 
+react-native-calendars@^1.32.0:
+  version "1.32.0"
+  resolved "https://registry.yarnpkg.com/react-native-calendars/-/react-native-calendars-1.32.0.tgz#3dc3d4c624f32f750731aa859efea80b2d3cb18b"
+  integrity sha512-dFwUexh76f5UHSRaKzICGNsKUsr0v+uiRbNwb6bcyf9S4nSyjbK+2VR/Ue0vf+xD4dxFgzapxRzqZ7bHwibvxA==
+  dependencies:
+    lodash.get "^4.4.2"
+    lodash.isequal "^4.5.0"
+    prop-types "^15.5.10"
+    xdate "^0.8.0"
+
 react-native-elements@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/react-native-elements/-/react-native-elements-1.1.0.tgz#f99bcda4459a886f3ab4591c684c099d37aedf2b"
@@ -11858,6 +11868,11 @@ react-native@0.57:
     xcode "^1.0.0"
     xmldoc "^0.4.0"
     yargs "^9.0.0"
+
+react-netlify-identity@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/react-netlify-identity/-/react-netlify-identity-0.0.7.tgz#92c5b1a07d240e7f201906ed677e61f037f3b68b"
+  integrity sha512-QvoZbdwPKvbmxSnykow+W5g6hhDb6aPtCxjGupkT06LanxcpLQ0rcPYxFapnvg4XD1Zpl6KyrahR84V4aZp91Q==
 
 react-proxy@^1.1.7:
   version "1.1.8"
@@ -14516,6 +14531,11 @@ xcode@^1.0.0:
   dependencies:
     simple-plist "^0.2.1"
     uuid "^3.3.2"
+
+xdate@^0.8.0:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/xdate/-/xdate-0.8.2.tgz#d7b033c00485d02695baf0044f4eacda3fc961a3"
+  integrity sha1-17AzwASF0CaVuvAET06s2j/JYaM=
 
 xml-name-validator@^3.0.0:
   version "3.0.0"
